@@ -124,9 +124,16 @@ abstract class PluginDependencyManager @Inject constructor(
             }
         }
         if (!plugin.builtin && !plugin.maven) {
-            val artifactParent = plugin.artifact.toPath().parent
+            val artifactPath = plugin.artifact.toPath()
+            val artifactParent = artifactPath.parent
             if (artifactParent.parent != Path.of(cacheDirectoryPath) && pluginSources.add(artifactParent.absolutePathString())) {
                 ivyArtifactRepository?.artifactPattern("$artifactParent/[artifact](.[ext])")  // local plugins
+            }
+            // plugin directories containing a 'lib' directory
+            val libDirectoryPath = artifactPath.resolve("lib")
+            if (libDirectoryPath.exists()) {
+                pluginSources.add(libDirectoryPath.absolutePathString())
+                ivyArtifactRepository?.artifactPattern("$libDirectoryPath/[artifact](.[ext])")
             }
         }
     }
